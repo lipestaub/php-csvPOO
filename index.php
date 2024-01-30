@@ -1,46 +1,43 @@
 <?php
+    use classes\Order;
+    use classes\Product;
+    use classes\File;
+    use classes\Mail;
+
     require_once './classes/Order.php';
     require_once './classes/Product.php';
-    require_once './classes/MyClass.php';
-
-    use \classes\Order;
-    use \classes\Product;
-    use \classes\MyClass;
+    require_once './classes/File.php';
+    require_once './classes/Mail.php';
 
     $product = new Product();
     $order = new Order();
-    $myClass = new MyClass();
+    $file = new File();
+    $mail = new Mail();
 
-    $products = $product->readFile();
-    $orders = $order->readFile();
+    $products = $file->readFile('products');
+    $orders = $file->readFile('orders');
 
-    $report = array();
-
-    foreach ($orders as $order) {
-        $product = $products[$order['product_id']];
-
-        echo "\n\nID:";
-        var_dump($order['order_id']);
-
-        if (!in_array($order['order_id'], array_keys($report))) {
-            echo "\n\nNÃO ESTÁ NO ARRAY";
-            $report[$order['order_id']] = [
-                'unit_price' => (float) $product['price'],
-                'last_order_date' => str_replace('"', '', $order['date']),
-                'quantity' => (int) $order['quantity'],
-            ];
-        }
-        else {
-            echo "\n\nESTÁ NO ARRAY";
-            $report[$order['order_id']]['quantity'] += (int) $order['quantity'];
-
-            if (strtotime(str_replace('"', '', $order['date'])) > strtotime($report[$order['order_id']]['last_order_date'])) {
-                $report[$order['order_id']]['last_order_date'] = str_replace('"', '', $order['date']);
-            }
-        }
-
-        $report[$order['order_id']]['total_price'] = $report[$order['order_id']]['unit_price'] * $report[$order['order_id']]['quantity'];
+    foreach ($products as $product) {
+        $report[$product['product_id']] = [
+            'product_id' => $product['product_id'],
+            'unit_price' => (float) $product['price'],
+            'date' => '-',
+            'quantity' => 0,
+            'total_price' => 0
+        ];
     }
 
-    print_r($report);
+    foreach ($orders as $order) {
+        $report[$order['product_id']]['quantity'] += (int) $order['quantity'];
+
+        if (($report[$order['product_id']]['date'] === '-') || ((strtotime(str_replace('"', '', $order['date'])) > strtotime($report[$order['product_id']]['date'])))) {
+            $report[$order['product_id']]['date'] = str_replace('"', '', $order['date']);
+        }
+
+        $report[$order['product_id']]['total_price'] = $report[$order['product_id']]['unit_price'] * $report[$order['product_id']]['quantity'];
+    }
+
+    $file->createReportFile($report);
+
+    $mail->sendEmail();
 ?>

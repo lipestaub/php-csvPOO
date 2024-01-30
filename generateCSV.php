@@ -14,7 +14,7 @@ class GenerateFiles {
         $file     = fopen(self::$products_csv_name, 'w');
         fputcsv($file, ['product_id', 'name', 'price']);
 
-        $count = 2;
+        $count = 20;
 
         for ($i=0; $i < $count; $i++) { 
             $id =  sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -42,7 +42,7 @@ class GenerateFiles {
         $last_id = '';
         $last_date = '';
 
-        $count = 5;
+        $count = 35;
 
         for ($i=0; $i < $count; $i++) { 
             $same = rand(0, 1);
