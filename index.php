@@ -1,43 +1,47 @@
 <?php
-    use classes\Order;
-    use classes\Product;
-    use classes\File;
-    use classes\Mail;
-
     require_once './classes/Order.php';
     require_once './classes/Product.php';
+    require_once './classes/Report.php';
     require_once './classes/File.php';
     require_once './classes/Mail.php';
 
-    $product = new Product();
-    $order = new Order();
-    $file = new File();
-    $mail = new Mail();
+    require 'vendor/autoload.php';
 
-    $products = $file->readFile('products');
-    $orders = $file->readFile('orders');
+    $productClass = new Product();
+    $orderClass = new Order();
+    $reportClass = new Report();
+    $fileClass = new File();
+    $mailClass = new Mail();
+
+    $products = $fileClass->readFile('products');
+    $orders = $fileClass->readFile('orders');
 
     foreach ($products as $product) {
-        $report[$product['product_id']] = [
-            'product_id' => $product['product_id'],
-            'unit_price' => (float) $product['price'],
-            'date' => '-',
-            'quantity' => 0,
-            'total_price' => 0
-        ];
+        $productObject = new Product($product['product_id'], $product['name'], $product['price']);
+        $productClass->addProduct($productObject);
     }
 
     foreach ($orders as $order) {
-        $report[$order['product_id']]['quantity'] += (int) $order['quantity'];
-
-        if (($report[$order['product_id']]['date'] === '-') || ((strtotime(str_replace('"', '', $order['date'])) > strtotime($report[$order['product_id']]['date'])))) {
-            $report[$order['product_id']]['date'] = str_replace('"', '', $order['date']);
-        }
-
-        $report[$order['product_id']]['total_price'] = $report[$order['product_id']]['unit_price'] * $report[$order['product_id']]['quantity'];
+        $orderClass->addOrder(new Order($order['order_id'], $order['product_id'], $order['date'], $order['quantity']));
     }
 
-    $file->createReportFile($report);
+    foreach ($productClass->getProducts() as $product) {
+        $reportClass->addProduct(new Report($product->getProductId(), $product->getPrice()));
+    }
 
-    $mail->sendEmail();
+    $reportProducts = $reportClass->getProducts();
+
+    foreach ($orderClass->getOrders() as $order) {
+        $product = $reportProducts[$order->getProductId()];
+        $product->incrementQuantity($order->getQuantity());
+
+        if ($product->getDate() === '-' || (strtotime($order->getDate()) > strtotime($product->getDate()))) {
+            $product->setDate($order->getDate());
+        }
+
+        $product->setTotal($product->getQuantity() * $product->getunitPrice());
+    }
+
+    $fileClass->createReportFile($reportClass->getProducts());
+    $mailClass->sendEmail();
 ?>

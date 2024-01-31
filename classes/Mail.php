@@ -1,14 +1,10 @@
-<?php
-    namespace classes;
-    
+<?php    
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\SMTP;
     use PHPMailer\PHPMailer\Exception;
 
-    require 'vendor/autoload.php';
-
     class Mail {
-        public function sendEmail() {
+        public function sendEmail() : void {
             $mail = new PHPMailer(true);
 
             try {
