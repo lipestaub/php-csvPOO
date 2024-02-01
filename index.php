@@ -43,5 +43,5 @@
     }
 
     $fileClass->createReportFile($reportClass->getProducts());
-    $mailClass->sendEmail();
+    $mailClass->sendEmail('Felipe Ariel Staub', 'fstaub.imply@gmail.com');
 ?>

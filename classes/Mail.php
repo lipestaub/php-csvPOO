@@ -4,7 +4,7 @@
     use PHPMailer\PHPMailer\Exception;
 
     class Mail {
-        public function sendEmail() : void {
+        public function sendEmail(string $recepientName, string $recipientEmail) : void {
             $mail = new PHPMailer(true);
 
             try {
@@ -12,25 +12,25 @@
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'lipestaub.senac@gmail.com';
-                $mail->Password = 'wjhj xcnv lelk wguv';
+                $mail->Username = 'fstaub.imply@gmail.com';
+                $mail->Password = 'iwmk lvgw tocj laqh';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                 $mail->Port = 465;
 
-                $mail->setFrom('lipestaub.senac@gmail.com', 'Felipe');
-                $mail->addAddress('lipestaub.senac@gmail.com', 'Felipe');
+                $mail->setFrom('fstaub.imply@gmail.com', 'Felipe Staub');
+                $mail->addAddress($recipientEmail, $recepientName);
 
                 $mail->addAttachment(__DIR__ . '/../report.csv');
 
                 $mail->isHTML(true);
                 $mail->Subject = 'Report';
-                $mail->Body = 'Report:';
-                $mail->AltBody = 'Report:';
+                $mail->Body = 'Report attached.';
+                $mail->AltBody = 'Report attached.';
 
                 $mail->send();
                 echo "Message has been sent\n";
-            } catch (Exception $e) {
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}\n";
+            } catch (Exception $exception) {
+                echo "Message could not be sent. Error: {$exception->getMessage()}\n";
             }
         }
     }
